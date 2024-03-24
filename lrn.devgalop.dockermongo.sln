@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lrn.devgalop.dockermongo.Core", "lrn.devgalop.dockermongo.Core\lrn.devgalop.dockermongo.Core.csproj", "{EDA0A9EF-F606-4D6E-9C89-9FDC3DF83CF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lrn.devgalop.dockermongo.Infrastructure", "lrn.devgalop.dockermongo.Infrastructure\lrn.devgalop.dockermongo.Infrastructure.csproj", "{BFBDEEAA-F85E-4285-B622-509C29A96F00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lrn.devgalop.dockermongo.Webapi", "lrn.devgalop.dockermongo.Webapi\lrn.devgalop.dockermongo.Webapi.csproj", "{F4E3B290-85B1-4C56-A188-0683B953E67A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lrn.devgalop.dockermongo.Tests", "lrn.devgalop.dockermongo.Tests\lrn.devgalop.dockermongo.Tests.csproj", "{3C7D5B34-9425-4A45-A29C-BCF6CEA74A4F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDA0A9EF-F606-4D6E-9C89-9FDC3DF83CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDA0A9EF-F606-4D6E-9C89-9FDC3DF83CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDA0A9EF-F606-4D6E-9C89-9FDC3DF83CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDA0A9EF-F606-4D6E-9C89-9FDC3DF83CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFBDEEAA-F85E-4285-B622-509C29A96F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFBDEEAA-F85E-4285-B622-509C29A96F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFBDEEAA-F85E-4285-B622-509C29A96F00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFBDEEAA-F85E-4285-B622-509C29A96F00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4E3B290-85B1-4C56-A188-0683B953E67A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4E3B290-85B1-4C56-A188-0683B953E67A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4E3B290-85B1-4C56-A188-0683B953E67A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4E3B290-85B1-4C56-A188-0683B953E67A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C7D5B34-9425-4A45-A29C-BCF6CEA74A4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C7D5B34-9425-4A45-A29C-BCF6CEA74A4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C7D5B34-9425-4A45-A29C-BCF6CEA74A4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C7D5B34-9425-4A45-A29C-BCF6CEA74A4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
