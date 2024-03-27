@@ -33,5 +33,20 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
                 return BadRequest(ex);
             }
         }
+
+        [HttpGet("{username}")]
+        public async Task<IActionResult> GetUser(string username)
+        {
+            try
+            {
+                var response = await _userService.GetUserAsync(username);
+                if(!response.IsSucceed) throw new Exception(response.ErrorMessage);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
     }
 }

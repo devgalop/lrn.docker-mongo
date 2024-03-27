@@ -9,5 +9,6 @@ namespace lrn.devgalop.dockermongo.Core.Interfaces
     public interface IUserManagementService
     {
         Task<BaseResponse> InsertUserAsync(InsertUserRequest request);
+        Task<BasicUserResponse> GetUserAsync(string username);
     }
 }

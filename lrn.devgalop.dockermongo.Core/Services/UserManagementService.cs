@@ -68,5 +68,32 @@ namespace lrn.devgalop.dockermongo.Core.Services
             }
         }
 
+        public async Task<BasicUserResponse> GetUserAsync(string username)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username))throw new ArgumentNullException("Username cannot be null or empty");
+                var response = await _repository.GetUserAsync(username);
+                if(!response.IsSucceed || response.Result is null) throw new Exception($"Could not find user '{username}' in repository. {response.ErrorMessage}");
+                return new()
+                {
+                    IsSucceed = true,
+                    Username = response.Result.Username,
+                    RegistrationDate = response.Result.RegistrationDate,
+                    Status = response.Result.Status,
+                    Role = response.Result.RoleId.ToString()
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
     }
 }

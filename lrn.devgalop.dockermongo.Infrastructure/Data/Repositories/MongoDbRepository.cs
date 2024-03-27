@@ -46,5 +46,29 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Data.Repositories
                 };
             }
         }
+
+        public async Task<UserResponse> GetUserAsync(string username, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username))throw new ArgumentNullException("Username cannot be null or empty");
+                var usersCollection = _database.GetCollection<User>("users");
+                var user = await usersCollection.Find(u => u.Username == username).FirstOrDefaultAsync();
+                return new()
+                {
+                    IsSucceed = true,
+                    Result = user
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
     }
 }
