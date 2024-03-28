@@ -79,7 +79,90 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Data.Repositories
                 if(auth is null) throw new ArgumentNullException("Auth model cannot be null");
                 var usersCollection = _database.GetCollection<User>("users");
                 var userFiltered = Builders<User>.Filter.Eq(user=> user.Username, username);
-                var userUpdated = Builders<User>.Update.Set(user => user.Auth, auth);
+                var userUpdated = Builders<User>.Update.Set(user => user.Auth, auth)
+                                                        .Set(user => user.UpdateDate, DateTime.UtcNow);
+                var response = await usersCollection.UpdateOneAsync(userFiltered, userUpdated);
+                if(response.ModifiedCount <= 0) throw new Exception($"Cannot update user.");
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<BaseResponse> RevokeAuthAsync(string username, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username))throw new ArgumentNullException("Username cannot be null or empty");
+                var usersCollection = _database.GetCollection<User>("users");
+                var userFiltered = Builders<User>.Filter.Eq(user=> user.Username, username);
+                var userUpdated = Builders<User>.Update.Set(user => user.Auth, null)
+                                                        .Set(user => user.UpdateDate, DateTime.UtcNow);
+                var response = await usersCollection.UpdateOneAsync(userFiltered, userUpdated);
+                if(response.ModifiedCount <= 0) throw new Exception($"Cannot update user.");
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DisableUserAsync(string username, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username))throw new ArgumentNullException("Username cannot be null or empty");
+                var usersCollection = _database.GetCollection<User>("users");
+                var userFiltered = Builders<User>.Filter.Eq(user=> user.Username, username);
+                var userUpdated = Builders<User>.Update.Set(user => user.Status, false)
+                                                        .Set(user => user.UpdateDate, DateTime.UtcNow);
+                var response = await usersCollection.UpdateOneAsync(userFiltered, userUpdated);
+                if(response.ModifiedCount <= 0) throw new Exception($"Cannot update user.");
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<BaseResponse> ChangePassword(string username, string passwordHashed, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username))throw new ArgumentNullException("Username cannot be null or empty");
+                var usersCollection = _database.GetCollection<User>("users");
+                var userFiltered = Builders<User>.Filter.Eq(user=> user.Username, username);
+                var userUpdated = Builders<User>.Update.Set(user => user.Password, passwordHashed)
+                                                        .Set(user => user.Auth, null)
+                                                        .Set(user => user.UpdateDate, DateTime.UtcNow);
                 var response = await usersCollection.UpdateOneAsync(userFiltered, userUpdated);
                 if(response.ModifiedCount <= 0) throw new Exception($"Cannot update user.");
                 return new()
