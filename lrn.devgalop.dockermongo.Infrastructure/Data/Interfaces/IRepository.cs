@@ -10,5 +10,6 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Data.Interfaces
     {
         Task<BaseResponse> InsertAsync(User user, CancellationToken ct = default);
         Task<UserResponse> GetUserAsync(string username, CancellationToken ct = default);
+        Task<BaseResponse> UpdateAuthAsync(string username, UserAuth auth, CancellationToken ct = default);
     }
 }

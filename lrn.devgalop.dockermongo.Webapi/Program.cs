@@ -1,12 +1,16 @@
 using lrn.devgalop.dockermongo.Infrastructure.Data.Extensions;
 using lrn.devgalop.dockermongo.Core.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.EncryptDecrypt.Extensions;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions;
+using lrn.devgalop.dockermongo.Infrastructure.Security.TOTP.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCoreServices();
 builder.Services.AddMongoDb();
 builder.Services.AddAesEncryption();
+builder.Services.AddJwtSecurity();
+builder.Services.AddTOTP();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();

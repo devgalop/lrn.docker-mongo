@@ -9,6 +9,8 @@ using lrn.devgalop.dockermongo.Infrastructure.Data.Interfaces;
 using lrn.devgalop.dockermongo.Infrastructure.Data.Models;
 using lrn.devgalop.dockermongo.Infrastructure.Security.EncryptDecrypt.Interfaces;
 using lrn.devgalop.dockermongo.Infrastructure.Security.EncryptDecrypt.Models;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Interfaces;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Models;
 
 namespace lrn.devgalop.dockermongo.Core.Services
 {
@@ -17,16 +19,22 @@ namespace lrn.devgalop.dockermongo.Core.Services
         private readonly IRepository _repository;
         private readonly IAesCryptService _cryptService;
         private readonly AesCryptType _cryptConfig;
+        private readonly ITokenFactoryService _tokenFactory;
+        private readonly TokenConfiguration _tokenConfiguration;
 
         public UserManagementService(
             IRepository repository,
             IAesCryptService cryptService,
-            AesCryptType cryptConfig
+            AesCryptType cryptConfig,
+            ITokenFactoryService tokenFactory,
+            TokenConfiguration tokenConfiguration
             )
         {
             _repository = repository;
             _cryptService = cryptService;
             _cryptConfig = cryptConfig;
+            _tokenFactory = tokenFactory;
+            _tokenConfiguration = tokenConfiguration;
         }
 
         public async Task<Models.BaseResponse> InsertUserAsync(InsertUserRequest request)
@@ -95,5 +103,63 @@ namespace lrn.devgalop.dockermongo.Core.Services
             }
         }
 
+        public async Task<AuthResponse> LoginAsync(LoginRequest request)
+        {
+            try
+            {
+                List<ValidationResult> validationResults = new();
+                if(!Validator.TryValidateObject(request,new ValidationContext(request), validationResults, true))
+                {
+                    string errors = string.Join(",", validationResults.Where(r => !string.IsNullOrEmpty(r.ErrorMessage)).Select(r => r.ErrorMessage));
+                    throw new Exception($"Invalid model. {errors}");
+                }
+                
+                var userResponse = await _repository.GetUserAsync(request.Username);
+                if(!userResponse.IsSucceed || userResponse.Result is null) throw new Exception($"Could not find the user '{request.Username}' in database. {userResponse.ErrorMessage}");
+                
+                var cryptResponse = _cryptService.Encrypt(request.Password, _cryptConfig);
+                if(!cryptResponse.IsSucceed || string.IsNullOrEmpty(cryptResponse.Text)) throw new Exception($"Password encryption failed. {cryptResponse.ErrorMessage}");
+
+                var userFound = userResponse.Result;
+                if(userFound.Password != cryptResponse.Text) throw new Exception($"Username or password are incorrect.");
+
+                
+                List<ClaimRequest> claims = new()
+                {
+                    new(){ Type = "user", Value = userFound.Username },
+                    new(){ Type = "role", Value = userFound.RoleId.ToString()},
+                };
+                var tokenResponse = _tokenFactory.GenerateToken(_tokenConfiguration.SecretKey, claims);
+                if(!tokenResponse.IsSucceed || tokenResponse.Token is null) throw new Exception($"Could not create a token. {tokenResponse.ErrorMessage}");   
+                
+                var refreshTokenResponse = _tokenFactory.GenerateRefreshToken(60);
+                if(!refreshTokenResponse.IsSucceed || refreshTokenResponse.Token is null)throw new Exception($"Could not create a refresh token. {refreshTokenResponse.ErrorMessage}");
+
+                var updateResponse = await _repository.UpdateAuthAsync(userFound.Username, new()
+                {
+                    RefreshToken = refreshTokenResponse.Token,
+                    ExpirationRefreshToken = refreshTokenResponse.Expiration
+                });
+                if(!updateResponse.IsSucceed)throw new Exception($"User token cannot be saved. {updateResponse.ErrorMessage}");
+
+                return new()
+                {
+                    IsSucceed = true,
+                    Token = tokenResponse.Token,
+                    TokenExpiration = tokenResponse.Expiration,
+                    RefreshToken = refreshTokenResponse.Token,
+                    RefreshTokenExpiration = refreshTokenResponse.Expiration
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
     }
 }

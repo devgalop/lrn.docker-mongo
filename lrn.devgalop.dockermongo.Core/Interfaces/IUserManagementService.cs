@@ -10,5 +10,6 @@ namespace lrn.devgalop.dockermongo.Core.Interfaces
     {
         Task<BaseResponse> InsertUserAsync(InsertUserRequest request);
         Task<BasicUserResponse> GetUserAsync(string username);
+        Task<AuthResponse> LoginAsync(LoginRequest request);
     }
 }

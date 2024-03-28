@@ -99,7 +99,7 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Services
                 {
                     IsSucceed = true,
                     Token = Convert.ToBase64String(randomNumber),
-                    Expiration = DateTime.UtcNow.AddMinutes(durationInMinutes)
+                    Expiration = DateTime.UtcNow.AddMinutes(durationInMinutes).ToLocalTime()
                 };
             }
             catch (Exception ex)
