@@ -3,6 +3,7 @@ using lrn.devgalop.dockermongo.Core.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.EncryptDecrypt.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.TOTP.Extensions;
+using GraphQL.AspNet.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddMongoDb();
 builder.Services.AddAesEncryption();
 builder.Services.AddJwtSecurity();
 builder.Services.AddTOTP();
+
+builder.Services.AddGraphQL();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
@@ -30,6 +33,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseGraphQL();
+
 app.MapControllers();
 app.MapHealthChecks("/healthy");
 app.Run();
