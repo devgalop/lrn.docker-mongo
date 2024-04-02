@@ -52,7 +52,6 @@ namespace lrn.devgalop.dockermongo.Core.Services
                 var passwordHashed = cryptResponse.Text;
 
                 var userFoundResponse = await _repository.GetUserAsync(request.Username);
-                if(!userFoundResponse.IsSucceed) throw new Exception($"Cannot validate user existence. {userFoundResponse.ErrorMessage}");
                 if(userFoundResponse.Result is not null) throw new Exception($"Username {request.Username} already exists");
 
                 var insertResponse = await _repository.InsertAsync(new User()
