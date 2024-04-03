@@ -13,6 +13,8 @@ namespace lrn.devgalop.dockermongo.Core.Extensions
         public static void AddCoreServices(this IServiceCollection services)
         {
             services.AddTransient<IUserManagementService, UserManagementService>();
+            services.AddTransient<IProductManagementService, ProductManagementService>();
+            services.AddTransient<IAuthService, AuthService>();
         }
         
     }

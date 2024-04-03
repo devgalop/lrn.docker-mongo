@@ -36,7 +36,7 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions
                 })
                 .AddJwtBearer(opt =>
                 {
-                    var signingKey = new SymmetricSecurityKey(config.GetSigingKey(config.SecretKey));
+                    var signingKey = new SymmetricSecurityKey(config.GetSigningKey(config.SecretKey));
                     opt.RequireHttpsMetadata = false;
                     opt.SaveToken = true;
                     //Remeber those conditions when send to validate the token in middleware

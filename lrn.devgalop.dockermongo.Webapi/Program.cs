@@ -4,6 +4,7 @@ using lrn.devgalop.dockermongo.Infrastructure.Security.EncryptDecrypt.Extensions
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.TOTP.Extensions;
 using GraphQL.AspNet.Configuration;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<JwtAuthenticationMiddelware>();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseGraphQL();
 

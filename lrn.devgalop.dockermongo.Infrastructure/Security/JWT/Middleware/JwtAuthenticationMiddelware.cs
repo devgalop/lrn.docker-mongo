@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using lrn.devgalop.dockermongo.Infrastructure.Data.Interfaces;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Interfaces;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Models;
 using Microsoft.AspNetCore.Http;
@@ -15,15 +16,18 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware
         private readonly RequestDelegate _next;
         private readonly ITokenFactoryService _tokenFactoryService;
         private readonly TokenConfiguration _tokenConfiguration;
+        private readonly IRepository _repository;
 
         public JwtAuthenticationMiddelware(
             RequestDelegate next,
             ITokenFactoryService tokenFactoryService,
-            TokenConfiguration tokenConfiguration)
+            TokenConfiguration tokenConfiguration,
+            IRepository repository)
         {
             _next = next;
             _tokenFactoryService = tokenFactoryService;
             _tokenConfiguration = tokenConfiguration;
+            _repository = repository;
         }
 
         public async Task Invoke(HttpContext httpContext)
@@ -38,7 +42,7 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware
                                 .FirstOrDefault();
             if (token is not null && refreshToken is not null)
             {
-                var validationResponse = _tokenFactoryService.ValidateToken(token, new()
+                TokenValidationParameters tokenParams = new()
                 {
                     //Remember configurations applied in Extensions
                     ValidateAudience = _tokenConfiguration.ValidateAudience,
@@ -46,9 +50,36 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware
                     ValidateLifetime = _tokenConfiguration.ValidateLifeTime,
                     ValidateIssuerSigningKey = _tokenConfiguration.ValidateIssuerSigningKey,
                     ClockSkew = TimeSpan.Zero,
-                    IssuerSigningKey = new SymmetricSecurityKey(_tokenConfiguration.GetSigingKey(_tokenConfiguration.SecretKey)),
-                });
-                //Add logic after validation 
+                    IssuerSigningKey = new SymmetricSecurityKey(_tokenConfiguration.GetSigningKey(_tokenConfiguration.SecretKey)),
+                };
+                var validationResponse = _tokenFactoryService.ValidateToken(token, tokenParams);
+                if(!validationResponse.IsSucceed)
+                {
+                    // TODO: Use claim user to search user in database and compare refresh token
+                    var claimsFoundResponse = _tokenFactoryService.GetClaimsFromExpiredToken(token, tokenParams);
+                    if(!claimsFoundResponse.IsSucceed)
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    };
+                    var claimUser = claimsFoundResponse.Claims.Where(c => c.Type=="user").Select(c => c.Value).FirstOrDefault();
+                    if(string.IsNullOrEmpty(claimUser))
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    };
+                    var userResponse = await _repository.GetUserAsync(claimUser);
+                    if(!userResponse.IsSucceed || userResponse.Result is null)
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    };
+                    if(userResponse.Result.Auth is null || userResponse.Result.Auth.RefreshToken != refreshToken)
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    }; 
+                }
             }
             await _next(httpContext);
         }

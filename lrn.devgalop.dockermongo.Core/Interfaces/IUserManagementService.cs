@@ -23,13 +23,6 @@ namespace lrn.devgalop.dockermongo.Core.Interfaces
         Task<BasicUserResponse> GetUserAsync(string username);
 
         /// <summary>
-        /// Generate Jwt token and refresh token by logging into the application
-        /// </summary>
-        /// <param name="request">Login information</param>
-        /// <returns></returns>
-        Task<AuthResponse> LoginAsync(LoginRequest request);
-
-        /// <summary>
         /// Unable user without remove
         /// </summary>
         /// <param name="username">Username</param>
