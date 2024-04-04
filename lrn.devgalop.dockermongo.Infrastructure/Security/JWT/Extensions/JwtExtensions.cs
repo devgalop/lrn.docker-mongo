@@ -38,7 +38,7 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions
                 });
                 opt.AddPolicy("BasicRolePolicy", policy => 
                 {
-                    policy.AddRequirements(new RolePolicyRequirement("BASIC_AUTH"));
+                    policy.AddRequirements(new RolePolicyRequirement("ADMIN,BASIC_AUTH"));
                 });
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

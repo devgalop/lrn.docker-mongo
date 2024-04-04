@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using lrn.devgalop.dockermongo.Core.Interfaces;
 using lrn.devgalop.dockermongo.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lrn.devgalop.dockermongo.Webapi.Controllers
@@ -19,7 +20,7 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "AdminRolePolicy")]
         public async Task<IActionResult> InsertUser([FromBody]InsertUserRequest request)
         {
             try
@@ -34,7 +35,7 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
             }
         }
 
-        [HttpGet("{username}")]
+        [HttpGet("{username}"), Authorize(Policy = "BasicRolePolicy")]
         public async Task<IActionResult> GetUser(string username)
         {
             try
@@ -48,5 +49,53 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("disable/{username}"), Authorize(Policy = "AdminRolePolicy")]
+        public async Task<IActionResult> DisableUserAsync(string username)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username)) throw new ArgumentNullException($"Username cannot be null or empty");
+                var response = await _userService.DisableUserAsync(username);
+                if(!response.IsSucceed) throw new Exception($"User cannot be deactivated. {response.ErrorMessage}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("revoke/{username}"), Authorize(Policy = "AdminRolePolicy")]
+        public async Task<IActionResult> RevokeAccessAsync(string username)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(username)) throw new ArgumentNullException($"Username cannot be null or empty");
+                var response = await _userService.RevokeAccessAsync(username);
+                if(!response.IsSucceed) throw new Exception($"User access could not be removed. {response.ErrorMessage}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("pwd"), Authorize(Policy = "BasicRolePolicy")]
+        public async Task<IActionResult> UpdatePassword([FromBody]ModifyPasswordRequest request)
+        {
+            try
+            {
+                var response = await _userService.ModifyPasswordAsync(request);
+                if(!response.IsSucceed) throw new Exception(response.ErrorMessage);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
     }
 }
