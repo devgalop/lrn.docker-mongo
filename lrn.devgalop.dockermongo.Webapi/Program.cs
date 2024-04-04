@@ -45,8 +45,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("allow-any");
 app.UseHttpsRedirection();
-app.UseMiddleware<JwtAuthenticationMiddelware>();
 app.UseAuthentication();
+app.UseMiddleware<JwtAuthenticationMiddleware>();
 app.UseAuthorization();
 
 app.UseGraphQL();

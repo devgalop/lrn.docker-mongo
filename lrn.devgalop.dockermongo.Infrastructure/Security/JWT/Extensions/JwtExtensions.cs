@@ -53,12 +53,11 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions
                     var signingKey = new SymmetricSecurityKey(config.GetSigningKey(config.SecretKey));
                     opt.RequireHttpsMetadata = false;
                     opt.SaveToken = true;
-                    //Remeber those conditions when send to validate the token in middleware
                     opt.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateAudience = config.ValidateAudience,
                         ValidateIssuer = config.ValidateIssuer,
-                        ValidateLifetime = config.ValidateLifeTime,
+                        ValidateLifetime = false,//config.ValidateLifeTime,
                         ValidateIssuerSigningKey = config.ValidateIssuerSigningKey,
                         IssuerSigningKey = signingKey,
                         ClockSkew = TimeSpan.Zero

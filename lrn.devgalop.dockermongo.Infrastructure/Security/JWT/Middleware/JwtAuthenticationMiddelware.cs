@@ -11,14 +11,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware
 {
-    public class JwtAuthenticationMiddelware
+    public class JwtAuthenticationMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ITokenFactoryService _tokenFactoryService;
         private readonly TokenConfiguration _tokenConfiguration;
         private readonly IRepository _repository;
 
-        public JwtAuthenticationMiddelware(
+        public JwtAuthenticationMiddleware(
             RequestDelegate next,
             ITokenFactoryService tokenFactoryService,
             TokenConfiguration tokenConfiguration,
@@ -74,7 +74,9 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware
                         httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return;
                     };
-                    if(userResponse.Result.Auth is null || userResponse.Result.Auth.RefreshToken != refreshToken)
+                    if(userResponse.Result.Auth is null 
+                    || userResponse.Result.Auth.RefreshToken != refreshToken 
+                    || userResponse.Result.Auth.ExpirationRefreshToken.ToLocalTime() < DateTime.Now)
                     {
                         httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return;

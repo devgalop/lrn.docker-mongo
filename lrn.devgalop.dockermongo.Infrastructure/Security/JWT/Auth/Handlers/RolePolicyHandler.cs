@@ -13,7 +13,7 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Auth.Handlers
         {
             if(context is null) return Task.CompletedTask;
 
-            if (context.User is null || context.User.Identity?.IsAuthenticated == false)
+            if (context.User is null)
             {
                 context.Fail();
                 return Task.CompletedTask;
