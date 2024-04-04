@@ -62,7 +62,7 @@ namespace lrn.devgalop.dockermongo.Core.Services
                 List<ClaimRequest> claims = new()
                 {
                     new(){ Type = "user", Value = userFound.Username },
-                    new(){ Type = "role", Value = userFound.RoleId.ToString()},
+                    new(){ Type = "custom-role", Value = userFound.RoleId.ToString()},
                 };
                 var tokenResponse = _tokenFactory.GenerateToken(_tokenConfiguration.SecretKey, claims);
                 if(!tokenResponse.IsSucceed || tokenResponse.Token is null) throw new Exception($"Could not create a token. {tokenResponse.ErrorMessage}");   
@@ -119,7 +119,7 @@ namespace lrn.devgalop.dockermongo.Core.Services
 
                 var claimsFromToken = claimsFromTokenResponse.Claims;
                 var claimUser = claimsFromToken.Where(c => c.Type == "user").Select(c => c.Value).FirstOrDefault();
-                var claimRole = claimsFromToken.Where(c => c.Type == "role").Select(c => c.Value).FirstOrDefault();
+                var claimRole = claimsFromToken.Where(c => c.Type == "custom-role").Select(c => c.Value).FirstOrDefault();
                 if (string.IsNullOrEmpty(claimUser)|| string.IsNullOrEmpty(claimRole)) throw new Exception("Invalid token");
 
                 var userResponse = await _repository.GetUserAsync(claimUser);
@@ -132,7 +132,7 @@ namespace lrn.devgalop.dockermongo.Core.Services
                 List<ClaimRequest> claims = new()
                 {
                     new(){ Type = "user", Value = claimUser },
-                    new(){ Type = "role", Value = claimRole},
+                    new(){ Type = "custom-role", Value = claimRole},
                 };
                 var tokenResponse = _tokenFactory.GenerateToken(_tokenConfiguration.SecretKey, claims);
                 if(!tokenResponse.IsSucceed || tokenResponse.Token is null) throw new Exception($"Could not create a token. {tokenResponse.ErrorMessage}");   

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Auth.Handlers;
+using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Auth.Requirements;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Interfaces;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Models;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
@@ -25,8 +28,19 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions
             };
             services.AddTransient(_=> config);
             services.AddTransient<ITokenFactoryService, TokenFactoryService>();
+            services.AddTransient<IAuthorizationHandler, RolePolicyHandler>();
 
-            services.AddAuthorization();
+            services.AddAuthorization(opt => 
+            {
+                opt.AddPolicy("AdminRolePolicy", policy => 
+                {
+                    policy.AddRequirements(new RolePolicyRequirement("ADMIN"));
+                });
+                opt.AddPolicy("BasicRolePolicy", policy => 
+                {
+                    policy.AddRequirements(new RolePolicyRequirement("BASIC_AUTH"));
+                });
+            });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddCookie(opt => 
                 {
