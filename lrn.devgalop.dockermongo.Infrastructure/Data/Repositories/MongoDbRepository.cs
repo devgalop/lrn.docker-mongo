@@ -180,5 +180,141 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Data.Repositories
                 };
             }
         }
+    
+        public async Task<BaseResponse> CreateProductAsync(Product product, CancellationToken ct = default)
+        {
+            try
+            {
+                List<ValidationResult> validationResults = new();
+                if(product is null) throw new Exception("Product model cannot be null or empty");
+                if(!Validator.TryValidateObject(product,new ValidationContext(product), validationResults,true))
+                {
+                    string errors = string.Join(",",validationResults.Select(r => r.ErrorMessage));
+                    throw new Exception($"Invalid model. Error: {errors}");
+                }
+                var productsCollection = _database.GetCollection<Product>("products");
+                await productsCollection.InsertOneAsync(product, new InsertOneOptions(), ct);
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<ProductResponse> GetProductAsync(string name, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(name)) throw new Exception("Product unique id cannot be null or empty");
+                var productsCollection = _database.GetCollection<Product>("products");
+                var product = await productsCollection.Find(p => p.UUID == name).FirstOrDefaultAsync();
+                return new()
+                {
+                    IsSucceed = true,
+                    Result = product
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<ProductsResponse> GetProductsByNameAsync(string name, CancellationToken ct = default)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(name)) throw new Exception("Product unique id cannot be null or empty");
+                var productsCollection = _database.GetCollection<Product>("products");
+                var product = await productsCollection.Find(p => p.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+                return new()
+                {
+                    IsSucceed = true,
+                    Result = product
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<ProductsResponse> GetProductsByStatusAsync(bool status = true, CancellationToken ct = default)
+        {
+            try
+            {
+                var productsCollection = _database.GetCollection<Product>("products");
+                var product = await productsCollection.Find(p => p.Status == status).ToListAsync();
+                return new()
+                {
+                    IsSucceed = true,
+                    Result = product
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<BaseResponse> UpdateProductAsync (string uniqueId, UpdateProductRequest request, CancellationToken ct = default)
+        {
+            try
+            {
+                List<ValidationResult> validationResults = new();
+                if(request is null) throw new Exception("Product model cannot be null or empty");
+                if(!Validator.TryValidateObject(request,new ValidationContext(request), validationResults,true))
+                {
+                    string errors = string.Join(",",validationResults.Select(r => r.ErrorMessage));
+                    throw new Exception($"Invalid model. Error: {errors}");
+                }
+                var productsCollection = _database.GetCollection<Product>("products");
+                var productFiltered = Builders<Product>.Filter.Eq(product=> product.UUID, uniqueId);
+                var productUpdated = Builders<Product>.Update.Set(product => product.Name, request.Name)
+                                                        .Set(product => product.Description, request.Description)
+                                                        .Set(product => product.Status, request.Status)
+                                                        .Set(product => product.UnitPrice, request.UnitPrice)
+                                                        .Set(product => product.SellUnitPrice, request.SellUnitPrice)
+                                                        .Set(product => product.UpdateDate, DateTime.UtcNow);
+                var response = await productsCollection.UpdateOneAsync(productFiltered, productUpdated);
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }     
     }
 }
