@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace lrn.devgalop.dockermongo.Core.Models
 {
-    public class ProductResponse
+    public class BasicProductResponse : BaseResponse
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;

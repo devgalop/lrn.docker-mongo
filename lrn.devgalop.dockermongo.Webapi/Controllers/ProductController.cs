@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using GraphQL.AspNet.Attributes;
 using GraphQL.AspNet.Controllers;
+using GraphQL.AspNet.Interfaces.Controllers;
 using lrn.devgalop.dockermongo.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -25,11 +27,31 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
         {
             return new()
             {
-                IsSucceed = true,
                 Name = "MockProduct",
                 UnitPrice = 5.50,
-                Stock = 2
             };
+        }
+
+        [Mutation("createProduct")]
+        public ProductResponse InsertProductAsync(ProductResponse product)
+        {
+            try
+            {
+                Console.WriteLine("Hello");
+                return new()
+                {
+                    Name = "MockProduct",
+                    UnitPrice = 5.50,
+                };
+            }
+            catch (Exception)
+            {
+                return new()
+                {
+                    Name = "MockProduct",
+                    UnitPrice = 5.50,
+                };
+            }
         }
     }
 }

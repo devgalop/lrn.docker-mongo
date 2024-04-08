@@ -210,13 +210,13 @@ namespace lrn.devgalop.dockermongo.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<ProductResponse> GetProductAsync(string name, CancellationToken ct = default)
+        public async Task<ProductResponse> GetProductAsync(string uniqueId, CancellationToken ct = default)
         {
             try
             {
-                if(string.IsNullOrEmpty(name)) throw new Exception("Product unique id cannot be null or empty");
+                if(string.IsNullOrEmpty(uniqueId)) throw new Exception("Product unique id cannot be null or empty");
                 var productsCollection = _database.GetCollection<Product>("products");
-                var product = await productsCollection.Find(p => p.UUID == name).FirstOrDefaultAsync();
+                var product = await productsCollection.Find(p => p.UUID == uniqueId).FirstOrDefaultAsync();
                 return new()
                 {
                     IsSucceed = true,
