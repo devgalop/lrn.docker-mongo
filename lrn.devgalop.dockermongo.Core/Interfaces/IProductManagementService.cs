@@ -27,5 +27,19 @@ namespace lrn.devgalop.dockermongo.Core.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<MultipleProductResponse> GetActiveProductsAsync();
+
+        /// <summary>
+        /// Get products that product name contains a string
+        /// </summary>
+        /// <param name="name">similar string</param>
+        /// <returns></returns>
+        Task<MultipleProductResponse> GetProductsAsync(string name);
+        
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
+        /// <param name="request">product</param>
+        /// <returns></returns>
+        Task<BaseResponse> UpdateProductAsync(UpdateProductRequest request);
     }
 }
