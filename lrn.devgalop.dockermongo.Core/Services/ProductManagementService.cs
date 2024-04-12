@@ -121,5 +121,78 @@ namespace lrn.devgalop.dockermongo.Core.Services
                 };
             }
         }
+
+        public async Task<MultipleProductResponse> GetProductsAsync(string name)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(name)) throw new Exception($"For searching products in database it is mandatory write a name");
+                var response = await _repository.GetProductsByNameAsync(name);
+                if(!response.IsSucceed || response.Result is null) throw new Exception($"There is not products in database with name similar to {name}. {response.ErrorMessage}");
+                var products = response.Result.Select(p => new ProductResponse()
+                {
+                    Id = p.UUID,
+                    Name = p.Name,
+                    RegistrationDate = p.RegistrationDate,
+                    Status = p.Status,
+                    UnitPrice = p.UnitPrice,
+                    SellUnitPrice = p.SellUnitPrice
+                });
+                return new()
+                {
+                    IsSucceed = true,
+                    Products = products
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
+
+        public async Task<BaseResponse> UpdateProductAsync(UpdateProductRequest request)
+        {
+            try
+            {
+                List<ValidationResult> validationResults = new List<ValidationResult>();
+                if(!Validator.TryValidateObject(request, new ValidationContext(request), validationResults, true))
+                {
+                    string errors = string.Join(",", validationResults.Where(r => !string.IsNullOrEmpty(r.ErrorMessage)).Select(r => r.ErrorMessage));
+                    throw new Exception($"Invalid product model. Errors: {errors}");
+                }
+                var productExists = await _repository.GetProductAsync(request.UniqueId);
+                if(!productExists.IsSucceed || productExists.Result is null) throw new Exception($"Product {request.UniqueId} does not exist in database. {productExists.ErrorMessage}");
+
+                var updateResponse = await _repository.UpdateProductAsync(request.UniqueId, new()
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    Status = request.Status,
+                    UpdateDate = request.UpdateDate,
+                    SellUnitPrice = request.SellUnitPrice,
+                    UnitPrice = request.UnitPrice
+                });
+                if(!updateResponse.IsSucceed) throw new Exception($"Product could not be updated. {updateResponse.ErrorMessage}");
+
+                return new()
+                {
+                    IsSucceed = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new()
+                {
+                    IsSucceed = false,
+                    ErrorMessage = ex.Message,
+                    ErrorDescription = ex.ToString()
+                };
+            }
+        }
     }
 }
