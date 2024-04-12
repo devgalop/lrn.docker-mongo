@@ -5,6 +5,7 @@ using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Extensions;
 using lrn.devgalop.dockermongo.Infrastructure.Security.TOTP.Extensions;
 using GraphQL.AspNet.Configuration;
 using lrn.devgalop.dockermongo.Infrastructure.Security.JWT.Middleware;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,12 @@ builder.Services.AddJwtSecurity();
 builder.Services.AddTOTP();
 
 builder.Services.AddGraphQL();
+
+builder.Services.AddApiVersioning(opt=>
+{
+    opt.AssumeDefaultVersionWhenUnspecified = true;
+    opt.DefaultApiVersion = new ApiVersion(1,0);
+});
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
