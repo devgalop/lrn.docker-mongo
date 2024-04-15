@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GraphQL.AspNet.Attributes;
 using GraphQL.AspNet.Controllers;
 using GraphQL.AspNet.Interfaces.Controllers;
+using lrn.devgalop.dockermongo.Core.Interfaces;
 using lrn.devgalop.dockermongo.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,40 +17,41 @@ namespace lrn.devgalop.dockermongo.Webapi.Controllers
     public class ProductController : GraphController
     {
         private readonly ILogger<ProductController> _logger;
+        private readonly IProductManagementService _productService;
 
-        public ProductController(ILogger<ProductController> logger)
+        public ProductController(
+            ILogger<ProductController> logger,
+            IProductManagementService productService)
         {
             _logger = logger;
+            _productService = productService;
         }
 
         [Query]
-        public ProductResponse GetProduct(int id)
+        public async Task<IEnumerable<ProductResponse>?> GetProducts()
         {
-            return new()
-            {
-                Name = "MockProduct",
-                UnitPrice = 5.50,
-            };
+            var productsResponse = await _productService.GetActiveProductsAsync();
+            return productsResponse.Products;
         }
 
         [Mutation("createProduct")]
-        public ProductResponse InsertProductAsync(ProductResponse product)
+        public async Task<BaseResponse> InsertProductAsync(InsertProductRequest request)
         {
             try
             {
-                Console.WriteLine("Hello");
+                var response = await _productService.CreateProductAsync(request);
+                if(!response.IsSucceed) throw new Exception(response.ErrorMessage);
                 return new()
                 {
-                    Name = "MockProduct",
-                    UnitPrice = 5.50,
+                    IsSucceed = true
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return new()
                 {
-                    Name = "MockProduct",
-                    UnitPrice = 5.50,
+                    IsSucceed = true,
+                    ErrorMessage = ex.Message
                 };
             }
         }
